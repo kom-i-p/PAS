@@ -1,6 +1,8 @@
 from parsers.fedstat import run as run_fedstat
 from parsers.osm import run as run_osm
 from parsers.rosstat import run as run_rosstat
+from analysis.characteristics import main as run_characteristics
+from analysis.preview import main as run_preview
 
 
 def run_parser(name, parser):
@@ -8,6 +10,16 @@ def run_parser(name, parser):
 
     try:
         parser()
+        print(f"{name}: OK")
+    except Exception as error:
+        print(f"{name}: ERROR: {error}")
+
+
+def run_analysis(name, analysis):
+    print(f"=== {name} ===")
+
+    try:
+        analysis()
         print(f"{name}: OK")
     except Exception as error:
         print(f"{name}: ERROR: {error}")
@@ -28,9 +40,23 @@ def main():
 
     print()
 
-    run_parser(
-        "OpenStreetMap",
-        run_osm,
+    #run_parser(
+    #    "OpenStreetMap",
+    #    run_osm,
+    #)
+
+    print()
+
+    run_analysis(
+        "Characteristics",
+        run_characteristics,
+    )
+
+    print()
+
+    run_analysis(
+        "Preview",
+        run_preview,
     )
 
 
