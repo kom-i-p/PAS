@@ -2,6 +2,7 @@ from pathlib import Path
 
 import requests
 
+from file_utils import get_excel_extension
 from load_manager import log_load, save_if_changed
 
 
@@ -28,12 +29,19 @@ def run():
 
     with requests.Session() as session:
         for name, url in ROSTAT_FILES.items():
-            output_path = output_dir / f"{name}.xlsx"
+            output_path = None
 
             try:
                 data = download_file(
                     session,
                     url,
+                )
+
+                extension = get_excel_extension(data)
+
+                output_path = (
+                    output_dir
+                    / f"{name}{extension}"
                 )
 
                 changed = save_if_changed(

@@ -1,6 +1,7 @@
 from parsers.fedstat import run as run_fedstat
 from parsers.osm import run as run_osm
 from parsers.rosstat import run as run_rosstat
+from preprocessing import main as run_preprocessing
 from analysis.characteristics import main as run_characteristics
 from analysis.preview import main as run_preview
 
@@ -40,10 +41,17 @@ def main():
 
     print()
 
-    #run_parser(
-    #    "OpenStreetMap",
-    #    run_osm,
-    #)
+    run_parser(
+        "OpenStreetMap",
+        run_osm,
+    )
+
+    print()
+
+    run_analysis(
+        "Preprocessing",
+        run_preprocessing,
+    )
 
     print()
 

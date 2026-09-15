@@ -5,6 +5,8 @@ from bs4 import BeautifulSoup
 
 from load_manager import log_load, save_if_changed
 
+from file_utils import get_excel_extension
+
 
 BASE_URL = "https://www.fedstat.ru"
 
@@ -66,15 +68,19 @@ def run():
 
     with requests.Session() as session:
         for name, indicator_id in INDICATORS.items():
-            output_path = (
-                output_dir
-                / f"{name}_{indicator_id}.xlsx"
-            )
+            output_path = None
 
             try:
                 data = download_indicator(
                     session,
                     indicator_id,
+                )
+
+                extension = get_excel_extension(data)
+
+                output_path = (
+                    output_dir
+                    / f"{name}_{indicator_id}{extension}"
                 )
 
                 changed = save_if_changed(

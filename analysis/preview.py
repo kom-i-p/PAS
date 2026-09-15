@@ -53,6 +53,9 @@ def print_json_preview(path):
 
 def main():
     for path in sorted(RAW_DIR.rglob("*")):
+        if path.name.startswith("~$"):
+            continue
+
         if path.suffix.lower() in {".xlsx", ".xls"}:
             print_dataframe_preview(path)
         elif path.suffix.lower() == ".json":
