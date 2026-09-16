@@ -2,12 +2,27 @@ import json
 from pathlib import Path
 
 import pandas as pd
-from shapely.geometry import LineString, MultiLineString
+from shapely.geometry import LineString
 from shapely.ops import unary_union
 
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
-RAW_FILE = PROJECT_DIR / "data" / "raw" / "osm" / "subjects_ru.json"
+
+RAW_FILE = (
+    PROJECT_DIR
+    / "data"
+    / "raw"
+    / "osm"
+    / "subjects_ru.json"
+)
+
+ANALYTICAL_MART_FILE = (
+    PROJECT_DIR
+    / "data"
+    / "processed"
+    / "analytical_mart.csv"
+)
+
 OUTPUT_FILE = (
     PROJECT_DIR
     / "data"
@@ -19,6 +34,13 @@ OUTPUT_FILE = (
 def load_osm_data():
     with RAW_FILE.open("r", encoding="utf-8") as file:
         return json.load(file)
+
+
+def load_analytical_mart():
+    return pd.read_csv(
+        ANALYTICAL_MART_FILE,
+        encoding="utf-8-sig",
+    )
 
 
 def build_geometries(data):
@@ -57,8 +79,26 @@ def build_geometries(data):
     return geometries
 
 
+def filter_matched_geometries(geometries, analytical_mart):
+    matched_names = set(
+        analytical_mart["osm_name"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+    )
+
+    filtered_geometries = {
+        name: geometry
+        for name, geometry in geometries.items()
+        if name in matched_names
+    }
+
+    return filtered_geometries
+
+
 def build_adjacency_graph(geometries):
     names = list(geometries)
+
     graph = {
         name: set()
         for name in names
@@ -135,11 +175,31 @@ def save_matrix(matrix):
 
 def main():
     data = load_osm_data()
+    analytical_mart = load_analytical_mart()
+
     geometries = build_geometries(data)
 
-    print(f"Subjects with geometry: {len(geometries):,}")
+    print(
+        f"Subjects with geometry: "
+        f"{len(geometries):,}"
+    )
 
-    graph = build_adjacency_graph(geometries)
+    filtered_geometries = filter_matched_geometries(
+        geometries,
+        analytical_mart,
+    )
+
+    print(
+        f"Subjects matched with analytical mart: "
+        f"{len(filtered_geometries):,}"
+    )
+
+    print(
+        f"Subjects excluded: "
+        f"{len(geometries) - len(filtered_geometries):,}"
+    )
+
+    graph = build_adjacency_graph(filtered_geometries)
 
     edges = sum(
         len(neighbors)

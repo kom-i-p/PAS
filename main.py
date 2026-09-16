@@ -8,6 +8,7 @@ from analysis.eda import main as run_eda
 from analysis.indicators import main as run_indicators
 from analysis.subject_matrix import main as run_subject_matrix
 from analysis.district_matrix import main as run_district_matrix
+from analysis.visualization import main as run_visualization
 
 
 def run_parser(name, parser):
@@ -90,6 +91,8 @@ def main():
 
     run_analysis("District matrix", run_district_matrix)
     print()
+
+    run_analysis("Visualization", run_visualization)
 
 
 if __name__ == "__main__":
