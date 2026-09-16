@@ -6,6 +6,7 @@ from analysis.characteristics import main as run_characteristics
 from analysis.preview import main as run_preview
 from analysis.eda import main as run_eda
 from analysis.indicators import main as run_indicators
+from analysis.district_indicators import main as run_district_indicators
 from analysis.subject_matrix import main as run_subject_matrix
 from analysis.district_matrix import main as run_district_matrix
 from analysis.visualization import main as run_visualization
@@ -84,6 +85,12 @@ def main():
         run_indicators,
     )
 
+    print()
+
+    run_analysis(
+        "District indicators",
+        run_district_indicators,
+    )
     print()
 
     run_analysis("Subject matrix", run_subject_matrix)
