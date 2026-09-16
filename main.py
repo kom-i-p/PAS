@@ -10,6 +10,7 @@ from analysis.district_indicators import main as run_district_indicators
 from analysis.subject_matrix import main as run_subject_matrix
 from analysis.district_matrix import main as run_district_matrix
 from analysis.visualization import main as run_visualization
+from analysis.train_test_split import main as run_train_test_split
 
 
 def run_parser(name, parser):
@@ -100,6 +101,11 @@ def main():
     print()
 
     run_analysis("Visualization", run_visualization)
+
+    run_analysis(
+        "Train validation split",
+        run_train_test_split,
+    )
 
 
 if __name__ == "__main__":

@@ -151,6 +151,79 @@ def save_data(df):
     )
 
 
+def add_lag_indicators(df):
+    population_years = get_year_columns(df)
+
+    population = pd.DataFrame(
+        {
+            year: df[column]
+            for year, column in population_years
+        }
+    )
+
+    for lag in (1, 2, 3):
+        for year in population.columns:
+            source_year = year - lag
+
+            if source_year not in population.columns:
+                continue
+
+            df[f"population_lag_{lag}_{year}"] = (
+                population[source_year]
+            )
+
+    return df
+
+
+def add_window_indicators(df):
+    indicators = [
+        ("population", ""),
+        ("births", "births_"),
+        ("deaths", "deaths_"),
+        ("natural_change", "natural_change_"),
+        ("birth_rate", "birth_rate_"),
+        ("death_rate", "death_rate_"),
+        ("urbanization", "urbanization_"),
+    ]
+
+    for name, prefix in indicators:
+        years = dict(
+            get_year_columns(df, prefix)
+        )
+
+        if not years:
+            continue
+
+        values = pd.DataFrame(
+            {
+                year: df[column]
+                for year, column in years.items()
+            }
+        )
+
+        for year in values.columns:
+            previous_years = [
+                previous_year
+                for previous_year in range(year - 3, year)
+                if previous_year in values.columns
+            ]
+
+            if len(previous_years) < 3:
+                continue
+
+            previous_values = values[previous_years]
+
+            df[
+                f"{name}_rolling_mean_3_{year}"
+            ] = previous_values.mean(axis=1)
+
+            df[
+                f"{name}_rolling_std_3_{year}"
+            ] = previous_values.std(axis=1)
+
+    return df
+
+
 def main():
     df = load_data()
 
@@ -158,6 +231,9 @@ def main():
     df = add_natural_change_indicators(df)
     df = add_relative_demographic_indicators(df)
     df = add_urbanization_indicators(df)
+
+    df = add_lag_indicators(df)
+    df = add_window_indicators(df)
 
     save_data(df)
 
