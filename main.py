@@ -11,6 +11,7 @@ from analysis.subject_matrix import main as run_subject_matrix
 from analysis.district_matrix import main as run_district_matrix
 from analysis.visualization import main as run_visualization
 from analysis.train_test_split import main as run_train_test_split
+from analysis.forecast import main as run_forecast
 
 
 def run_parser(name, parser):
@@ -106,6 +107,14 @@ def main():
         "Train validation split",
         run_train_test_split,
     )
+
+    print("\n=== Forecasting ===")
+
+    try:
+        run_forecast()
+        print("Forecasting: OK")
+    except Exception as error:
+        print(f"Forecasting: ERROR — {error}")
 
 
 if __name__ == "__main__":
