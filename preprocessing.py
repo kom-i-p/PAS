@@ -285,7 +285,7 @@ def find_migration_tables(path):
                 ]
 
                 match = re.fullmatch(
-                    r"\s*(\d{4})г\.\s*",
+                    r"\s*(\d{4})\s?г\.\s*",
                     str(year_value),
                 )
 

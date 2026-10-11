@@ -12,6 +12,8 @@ from analysis.district_matrix import main as run_district_matrix
 from analysis.visualization import main as run_visualization
 from analysis.train_test_split import main as run_train_test_split
 from analysis.forecast import main as run_forecast
+from analysis.prepare_migration_dataset import main as prepare_migration_dataset
+from analysis.apply_migration_model import main as apply_migration_model
 
 
 def run_parser(name, parser):
@@ -115,6 +117,9 @@ def main():
         print("Forecasting: OK")
     except Exception as error:
         print(f"Forecasting: ERROR — {error}")
+
+    prepare_migration_dataset()
+    apply_migration_model()
 
 
 if __name__ == "__main__":

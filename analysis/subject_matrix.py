@@ -31,6 +31,12 @@ OUTPUT_FILE = (
 )
 
 
+MANUAL_DISTANCES = {
+    ("Калининградская область", "Псковская область"): 3,
+    ("Калининградская область", "Смоленская область"): 3,
+}
+
+
 def load_osm_data():
     with RAW_FILE.open("r", encoding="utf-8") as file:
         return json.load(file)
@@ -136,23 +142,84 @@ def calculate_distances(graph, start):
 
 def build_matrix(graph):
     names = list(graph)
-    matrix = []
+    matrix = pd.DataFrame(
+        index=names,
+        columns=names,
+        dtype=float,
+    )
 
     for start in names:
         distances = calculate_distances(graph, start)
 
-        row = [
-            distances.get(name, float("nan"))
-            for name in names
+        for name in names:
+            matrix.loc[start, name] = distances.get(
+                name,
+                float("nan"),
+            )
+
+    for (first, second), distance in MANUAL_DISTANCES.items():
+        if first not in graph:
+            raise ValueError(
+                f"Субъект отсутствует в графе: {first}"
+            )
+
+        if second not in graph:
+            raise ValueError(
+                f"Субъект отсутствует в графе: {second}"
+            )
+
+        matrix.loc[first, second] = distance
+        matrix.loc[second, first] = distance
+
+    kaliningrad = "Калининградская область"
+
+    if kaliningrad in graph:
+        anchors = [
+            name
+            for name in (
+                "Псковская область",
+                "Смоленская область",
+            )
+            if name in graph
         ]
 
-        matrix.append(row)
+        for destination in names:
+            if destination == kaliningrad:
+                matrix.loc[kaliningrad, destination] = 0
+                continue
 
-    return pd.DataFrame(
-        matrix,
-        index=names,
-        columns=names,
-    )
+            candidate_distances = []
+
+            for anchor in anchors:
+                anchor_distance = matrix.loc[
+                    kaliningrad,
+                    anchor,
+                ]
+
+                path_distance = matrix.loc[
+                    anchor,
+                    destination,
+                ]
+
+                if pd.notna(path_distance):
+                    candidate_distances.append(
+                        anchor_distance + path_distance
+                    )
+
+            if candidate_distances:
+                distance = min(candidate_distances)
+
+                matrix.loc[
+                    kaliningrad,
+                    destination,
+                ] = distance
+
+                matrix.loc[
+                    destination,
+                    kaliningrad,
+                ] = distance
+
+    return matrix
 
 
 def save_matrix(matrix):
